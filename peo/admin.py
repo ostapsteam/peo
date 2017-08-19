@@ -1,18 +1,13 @@
 from .models import Lab
 from django.contrib.gis import admin as gisadmin
 from django.contrib.gis import forms as gisforms
-
-
-class LabAdminForm(gisforms.ModelForm):
-    class Meta:
-        model = Lab
-        widgets = {
-            'point': gisforms.OSMWidget
-        }
+from django.contrib.gis.db import models as gismodels
 
 
 class LabAdmin(gisadmin.OSMGeoAdmin):
-    form = LabAdminForm
+    formfield_overrides = {
+        gismodels.PointField: {'widget': gisforms.OSMWidget},
+    }
 
 
 gisadmin.site.register(Lab, LabAdmin)
