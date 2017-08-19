@@ -1,4 +1,14 @@
-from django.contrib import admin
 from .models import Lab
+from django.contrib.gis import admin as gisadmin
+from django.contrib.gis import forms as gisforms
 
-admin.site.register(Lab)
+
+class LabAdminForm(gisforms.ModelForm):
+    point = gisforms.PointField(widget=gisforms.OSMWidget(attrs={'display_raw': True}))
+
+
+class LabAdmin(gisadmin.GeoModelAdmin):
+    form = LabAdminForm
+
+
+gisadmin.site.register(Lab, LabAdmin)
