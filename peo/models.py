@@ -2,7 +2,7 @@ from django.contrib.gis.db import models as gismodels
 from protos.models.proto import GeoProto
 
 
-class Lab(gismodels.Model, GeoProto):
+class Lab(GeoProto):
 
     objects = gismodels.GeoManager()
 
