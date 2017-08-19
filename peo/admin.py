@@ -7,7 +7,7 @@ class LabAdminForm(gisforms.ModelForm):
     point = gisforms.PointField(widget=gisforms.OSMWidget(attrs={'display_raw': True}))
 
 
-class LabAdmin(gisadmin.GeoModelAdmin):
+class LabAdmin(gisadmin.OSMGeoAdmin):
     form = LabAdminForm
 
 
