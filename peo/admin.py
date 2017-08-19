@@ -4,9 +4,11 @@ from django.contrib.gis import forms as gisforms
 
 
 class LabAdminForm(gisforms.ModelForm):
-    point = gisforms.PointField(
-        widget=gisforms.OSMWidget(attrs={'display_raw': True})
-    )
+    class Meta:
+        model = Lab
+        widgets = {
+            'point': gisforms.OSMWidget
+        }
 
 
 class LabAdmin(gisadmin.OSMGeoAdmin):
