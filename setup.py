@@ -13,7 +13,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     license='BSD License',  # example license
-    description='A simple Django app to interact with telegram',
+    description='rest',
     long_description=README,
     url='',
     author='Alex Korotkov',
@@ -32,8 +32,5 @@ setup(
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     ],
-    install_requires=['Django', 'requests', 'protos'],
-    dependency_links=[
-        'https://testpypi.python.org/pypi/protos',
-    ]
+    install_requires=['flask_restful', 'sqlalchemy']
 )
