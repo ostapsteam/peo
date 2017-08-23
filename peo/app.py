@@ -1,23 +1,23 @@
+import argparse
+import logging
 from flask import Flask
-from flask_restful import Api
-from resources.lab import Lab
-from db import DB
 from sqlalchemy import create_engine
-from sqlalchemy.pool import QueuePool
+
+from peo.blueprints.labs import lab
+from peo.db import DB
+
+from peo.error import Errors
+
+log = logging.getLogger(__file__)
 
 app = Flask(__name__)
 
-DB.configure(
-    create_engine(
-        "sqlite:///db.sqlite",
-        # pool_size=5,
-        # pool=QueuePool,
-    )
-)
+DB.configure(engine=create_engine("postgresql://postgres:example@127.0.0.1/peo"))
 
-api = Api(app)
+app.register_blueprint(lab.labs_blue)
 
-api.add_resource(Lab, '/lab/<id>')
+Errors.register(lab.errors)
+
 
 if __name__ == "__main__":
     app.run(debug=True)

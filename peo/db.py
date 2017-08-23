@@ -1,25 +1,31 @@
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Query
 from contextlib import contextmanager
 
 
+class BaseQuery(Query):
+    def not_deleted(self, model_class):
+        return self.filter(model_class.deleted_at.isnot(None))
+
+
 class DB:
-    create_session = None
+    Session = None
 
     @classmethod
     def configure(cls, engine):
-        cls.create_session = sessionmaker(bind=engine)
+        cls.Session = sessionmaker(bind=engine, query_cls=BaseQuery)
 
     @classmethod
     @contextmanager
-    def __call__(cls):
-        assert cls.create_session, "SQLAlchemy engine is not set"
-        session = cls.create_session()
+    def session(cls):
+        assert cls.Session, "SQLAlchemy engine is not set"
+        s = cls.Session()
         try:
-            yield session
+            yield s
         except Exception as e:
-            session.rollback()
+            print(str(e))
+            s.rollback()
             raise
         else:
-            session.commit()
+            s.commit()
         finally:
-            session.close()
+            s.close()
