@@ -1,0 +1,4 @@
+{
+  "database": "postgresql://postgres:example@127.0.0.1/peo",
+  "workers": 2
+}

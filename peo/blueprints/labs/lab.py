@@ -9,11 +9,11 @@ from flask import Blueprint, request, jsonify, current_app
 from peo.error import Errors
 from peo.blueprints.labs.errors import errors
 
-labs_blue = Blueprint("labs", __name__)
+blue = Blueprint("labs", __name__)
 
 schema = LabSchema()
 
-@labs_blue.route("/labs", methods=["post"])
+@blue.route("/labs", methods=["post"])
 @Errors.handle_errors
 def post():
     current_app.logger.info("Lab create")
@@ -32,7 +32,7 @@ def post():
         return jsonify(schema.dump(lab).data), 201
 
 
-@labs_blue.route("/lab/<lid>", methods=["get"])
+@blue.route("/lab/<lid>", methods=["get"])
 @Errors.handle_errors
 def get(lid):
     current_app.logger.info("Lab %s read" % lid)
@@ -41,7 +41,7 @@ def get(lid):
         return jsonify(schema.dump(lab).data), 200
 
 
-@labs_blue.route("/lab/<lid>", methods=["put"])
+@blue.route("/lab/<lid>", methods=["put"])
 @Errors.handle_errors
 def put(lid):
     current_app.logger.info("Lab %s update" % lid)
@@ -59,7 +59,7 @@ def put(lid):
         return jsonify(schema.dump(lab).data), 200
 
 
-@labs_blue.route("/lab/<lid>", methods=["delete"])
+@blue.route("/lab/<lid>", methods=["delete"])
 @Errors.handle_errors
 def delete(lid):
     current_app.logger.info("Lab %s delete" % lid)
@@ -69,4 +69,4 @@ def delete(lid):
         return "", 204
 
 
-__all__ = "labs_blue", "errors"
+__all__ = "blue", "errors"
