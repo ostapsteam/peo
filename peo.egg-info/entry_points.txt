@@ -1,4 +1,0 @@
-[console_scripts]
-peo-database-manage = peo.manage:main
-peo-server = peo.app:main
-
