@@ -7,9 +7,8 @@ Base = declarative_base()
 
 
 class Proto():
-    __tablename__ = "labs"
 
-    name = sa.Column(sa.String(254), nullable=False, server_default='')
+    name = sa.Column(sa.String(length=254), nullable=False, server_default='')
     desc = sa.Column(sa.Text)
 
     created_at = sa.Column(sa.DateTime, nullable=False, server_default=func.now())
