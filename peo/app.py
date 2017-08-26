@@ -6,8 +6,8 @@ from gunicorn.app.base import Application
 from sqlalchemy import create_engine
 
 from peo.blueprints.labs import lab
+from peo.blueprints.accounts import account
 from peo.db import DB
-from peo.error import Errors
 from peo.utils import get_config
 
 log = logging.getLogger(__file__)
@@ -27,8 +27,7 @@ else:
 app = Flask(__name__)
 app.config.update(config)
 app.register_blueprint(lab.blue)
-
-Errors.register(lab.errors)
+app.register_blueprint(account.blue)
 
 
 class PeoApplication(Application):

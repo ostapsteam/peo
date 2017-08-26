@@ -1,9 +1,11 @@
 import sqlalchemy as sa
-from peo.models import Base, Proto
-from marshmallow import Schema, fields, pprint
+from sqlalchemy import orm
+
+from peo.models import Base, Thing
+from marshmallow import Schema, fields
 
 
-class Lab(Base, Proto):
+class Lab(Base, Thing):
 
     __tablename__ = "labs"
 
@@ -31,6 +33,15 @@ class Lab(Base, Proto):
         return session.query(Lab).filter(
             Lab.name == name
         ).first()
+
+    def set_name(self, name):
+        if self.name != name:
+            session = orm.object_session(self)
+            assert session is not None, "Lab has no attached session"
+            another_lab = Lab.get_by_name(session, name)
+            if another_lab and another_lab.id != self.id:
+                raise Lab.NameAlreadyInUse
+            self.name = name
 
 
 class LabSchema(Schema):
