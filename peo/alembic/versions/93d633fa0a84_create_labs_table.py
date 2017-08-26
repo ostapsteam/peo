@@ -22,7 +22,7 @@ def upgrade():
     op.create_table(
         "labs",
         sa.Column("id", sa.Integer, primary_key=True, autoincrement=True),
-        sa.Column("name", sa.String, nullable=False, unique=True),
+        sa.Column("name", sa.String(length=254), nullable=False, unique=True),
         sa.Column("desc", sa.Text),
         sa.Column("created_at", sa.DateTime, nullable=False, server_default=func.now()),
         sa.Column("updated_at", sa.DateTime, onupdate=func.now()),
