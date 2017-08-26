@@ -1,4 +1,3 @@
-import json
 import os
 from alembic.config import CommandLine, Config
 
