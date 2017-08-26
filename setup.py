@@ -8,7 +8,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='peo',
-    version='0.19',
+    version='0.20',
     packages=find_packages(),
     include_package_data=True,
     license='BSD License',  # example license

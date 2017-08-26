@@ -1,5 +1,6 @@
 include LICENSE
 include README.rst
+recursive-include peo/alembic.ini
 recursive-include peo/static *
 recursive-include peo/templates *
 recursive-include peo/alembic *
