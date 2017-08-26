@@ -22,10 +22,10 @@ class Account(Base, Proto):
     last_login = sa.Column(sa.DateTime)
 
     @staticmethod
-    def create(session, login, passwd):
+    def create(session, login, password):
         account = Account(
             login=login,
-            passwd_hash=generate_password_hash(passwd)
+            passwd_hash=generate_password_hash(password)
         )
         session.add(account)
         session.flush()

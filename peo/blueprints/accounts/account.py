@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, current_app
 
-from peo.blueprints.labs.errors import handle_errors
+from peo.blueprints.accounts.errors import handle_errors
 from peo.db import DB
 from peo.models.account import Account, AccountSchema
 
