@@ -1,5 +1,6 @@
 import os
 from tempfile import mktemp
+from threading import Thread
 from unittest import TestCase
 
 import logging
@@ -9,7 +10,7 @@ from alembic.command import upgrade as upgrade_database
 
 from peo.db import DB
 import peo
-
+from peo.app import app
 
 class DBTestCase(TestCase):
 
@@ -34,3 +35,12 @@ class DBTestCase(TestCase):
     def tearDown(self):
         if os._exists(self.__db_file):
             os.remove(self.__db_file)
+
+
+class RestTestCase(DBTestCase):
+
+    def setUp(self):
+        self.peo = app
+        self.peo.testing = True
+        self.peo = self.peo.test_client()
+        super().setUp()

@@ -12,14 +12,17 @@ from peo.utils import get_config
 
 log = logging.getLogger(__file__)
 
-parser = argparse.ArgumentParser()
-parser.add_argument("-c", dest="config", help="Config file")
-parser.add_argument("--debug", dest="debug", help="Debug mode", action="store_true")
-args = parser.parse_args()
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-c", dest="config", help="Config file")
+    parser.add_argument("--debug", dest="debug", help="Debug mode", action="store_true")
+    args = parser.parse_args()
 
-log.info("Parse config file %s", args.config)
-config = get_config(args.config)
-DB.configure(engine=create_engine(config["database"]))
+    log.info("Parse config file %s", args.config)
+    config = get_config(args.config)
+    DB.configure(engine=create_engine(config["database"]))
+else:
+    config = {}
 
 app = Flask(__name__)
 app.config.update(config)

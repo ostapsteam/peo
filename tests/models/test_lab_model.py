@@ -4,7 +4,7 @@ from peo.models.lab import Lab
 from tests import DBTestCase
 
 
-class TestLabModels(DBTestCase):
+class LabModelTestCase(DBTestCase):
 
     def setUp(self):
         super().setUp()
