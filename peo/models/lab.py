@@ -12,7 +12,7 @@ class Lab(Base, Proto):
         pass
 
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
-    name = sa.Column(sa.String, unique=True, nullable=False)
+    name = sa.Column(sa.String(254), unique=True, nullable=False)
 
     def __repr__(self):
         return "Lab #{}".format(self.id)
