@@ -4,7 +4,7 @@ from marshmallow import Schema, fields, pprint
 
 
 class Lab(Base, Proto):
-    
+
     __tablename__ = "labs"
 
     class DoesNotExist(Exception):
