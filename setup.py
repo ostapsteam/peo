@@ -8,7 +8,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='peo',
-    version='0.20',
+    version='0.21',
     packages=find_packages(),
     include_package_data=True,
     license='BSD License',  # example license
@@ -30,7 +30,7 @@ setup(
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     ],
-    install_requires=['flask', 'sqlalchemy', 'mysqlclient', 'gunicorn', 'alembic'],
+    install_requires=['flask', 'sqlalchemy', 'mysqlclient', 'gunicorn', 'alembic', 'marshmallow'],
     entry_points={
         'console_scripts': [
             'peo-server = peo.app:main',
