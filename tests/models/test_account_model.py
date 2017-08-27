@@ -23,6 +23,11 @@ class AccountModelTestCase(DBTestCase):
         with DB.session() as session:
             user2 = Account.get(session, account1.id)
             self.assertEqual(account1.id, user2.id)
+            user2.delete()
+
+        with DB.session() as session:
+            with self.assertRaises(Account.DoesNotExist):
+                Account.get(session, account1.id)
 
         with self.assertRaises(Account.DoesNotExist):
             Account.get(session, 0)
@@ -41,6 +46,10 @@ class AccountModelTestCase(DBTestCase):
             user2 = Account.get_by_login(session, account1.login)
             self.assertEqual(account1.id, user2.id)
             self.assertIsNone(Account.get_by_login(session, str(uuid.uuid4())))
+            user2.delete()
+
+        with DB.session() as session:
+            self.assertIsNone(Account.get_by_login(session, account1.login))
 
     def test_check_login_and_password(self):
         login = "user1"

@@ -4,7 +4,7 @@ from contextlib import contextmanager
 
 class BaseQuery(Query):
     def not_deleted(self, model_class):
-        return self.filter(model_class.deleted_at.isnot(None))
+        return self.filter(model_class.deleted_at == None)
 
 
 class DB:

@@ -32,6 +32,13 @@ class AccountHandlersTestCase(RestTestCase):
         self.assertEqual(account_resp["id"], account1.id)
         self.assertEqual(account_resp["login"], account1.login)
 
+        with DB.session() as session:
+            account1 = Account.get(session, account1.id)
+            account1.delete()
+
+        resp = self.peo.get("/account/{}".format(account1.id))
+        self.assertEqual(resp.status_code, 404)
+
     def test_account_handler_post(self):
         account1 = {
             "login": "account1",
@@ -104,6 +111,15 @@ class AccountHandlersTestCase(RestTestCase):
             self.assertNotEqual(account1["login"], db_account.login)
             self.assertNotEqual(account1passwd, db_account.passwd_hash)
 
+            db_account.delete()
+
+        resp = self.peo.put(
+            "/account/{}".format(db_account.id),
+            data=json.dumps(req),
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 404)
+
     def test_account_handler_delete(self):
         login = "account1"
         password = "password"
@@ -114,13 +130,16 @@ class AccountHandlersTestCase(RestTestCase):
         resp = self.peo.delete("/account/{}".format(account1.id))
         self.assertEqual(resp.status_code, 204)
 
+        resp = self.peo.delete("/account/{}".format(account1.id))
+        self.assertEqual(resp.status_code, 404)
+
         with self.assertRaises(Account.DoesNotExist):
             Account.get(self.db_session(), account1.id)
 
     def test_account_handler_accounts_login(self):
         req = {
-            "login": "account1",
-            "password": "password1"
+            "login": "account6",
+            "password": "password6"
         }
 
         with DB.session() as session:
@@ -133,9 +152,17 @@ class AccountHandlersTestCase(RestTestCase):
         )
         self.assertEqual(resp.status_code, 302)
 
+        resp = self.peo.post(
+            "/accounts/login",
+            data=json.dumps(req),
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 302)
+
+
     def test_account_handler_accounts_logout(self):
         resp = self.peo.get("/accounts/logout")
-        self.assertEqual(resp.status_code, 401)
+        self.assertEqual(resp.status_code, 204)
 
         req = {
             "login": "account1",

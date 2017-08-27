@@ -30,9 +30,12 @@ class Lab(Base, Thing):
 
     @staticmethod
     def get_by_name(session, name, with_deleted=False):
-        return session.query(Lab).filter(
+        result = session.query(Lab).filter(
             Lab.name == name
-        ).first()
+        )
+        if not with_deleted:
+            result = result.not_deleted(Lab)
+        return result.first()
 
     def set_name(self, name):
         if self.name != name:

@@ -36,6 +36,13 @@ class LabHandlersTestCase(RestTestCase):
         self.assertEqual(lab_resp["name"], lab1.name)
         self.assertEqual(lab_resp["desc"], lab1.desc)
 
+        with DB.session() as session:
+            lab1 = Lab.get(session, lab1.id)
+            lab1.delete()
+
+        resp = self.peo.get("/lab/{}".format(lab1.id))
+        self.assertEqual(resp.status_code, 404)
+
     def test_lab_handler_post(self):
         lab1 = {
             "name": "Lab2",
@@ -104,6 +111,17 @@ class LabHandlersTestCase(RestTestCase):
         self.assertEqual(lab_resp["name"], req["name"])
         self.assertEqual(lab_resp["desc"], req["desc"])
 
+        with DB.session() as session:
+            lab1 = Lab.get(session, lab1obj.id)
+            lab1.delete()
+
+        resp = self.peo.put(
+            "/lab/{}".format(lab1obj.id),
+            data=json.dumps(req),
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 404)
+
     def test_lab_handler_delete(self):
         name = "Lab1"
         desc = "Test desc"
@@ -120,3 +138,6 @@ class LabHandlersTestCase(RestTestCase):
 
         with self.assertRaises(Lab.DoesNotExist):
             Lab.get(self.db_session(), lab1.id)
+
+        resp = self.peo.delete("/lab/{}".format(lab1.id))
+        self.assertEqual(resp.status_code, 404)

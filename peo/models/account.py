@@ -43,9 +43,12 @@ class Account(Base, Proto):
 
     @staticmethod
     def get_by_login(session, login, with_deleted=False):
-        return session.query(Account).filter(
+        result = session.query(Account).filter(
             Account.login == login
-        ).first()
+        )
+        if not with_deleted:
+            result = result.not_deleted(Account)
+        return result.first()
 
     def set_password(self, passwd):
         self.passwd_hash = generate_password_hash(passwd)

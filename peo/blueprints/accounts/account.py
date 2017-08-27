@@ -73,21 +73,20 @@ def delete(aid):
 @handle_errors
 @validate(input_schema=input_schema)
 def login(content):
-    current_app.logger.info("Account login")
-    login = content["login"]
-    password = content["password"]
-    with DB.session() as db:
-        account = Account.check_login_and_password(db, login, password)
-        session["uid"] = account.id
-    return redirect(url_for('accounts.get', aid=account.id))
+    if "uid" not in session:
+        current_app.logger.info("Account login")
+        login = content["login"]
+        password = content["password"]
+        with DB.session() as db:
+            account = Account.check_login_and_password(db, login, password)
+            session["uid"] = account.id
+    return redirect(url_for('accounts.get', aid=session["uid"]))
 
 
 @blue.route("/accounts/logout", methods=["get"])
 @handle_errors
 def logout():
     current_app.logger.info("Account logout")
-    if "uid" not in session:
-        abort(401)
     session.pop("uid", None)
     return "", 204
 
