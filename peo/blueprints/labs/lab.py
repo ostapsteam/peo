@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, current_app, redirect, url_for
 from marshmallow import Schema, fields
 
 from peo.blueprints import validate
@@ -20,22 +20,18 @@ schema = LabSchema()
 
 @blue.route("/labs", methods=["post"])
 @handle_errors
-@validate(output_schema=schema, input_schema=input_schema)
+@validate(input_schema=input_schema)
 def post(content):
     current_app.logger.info("Lab create")
     name = content["name"]
+    desc = content["desc"]
     with DB.session() as db:
         lab = Lab.get_by_name(db, name)
         if lab:
             raise Lab.NameAlreadyInUse
-        lab = Lab(
-            name=name,
-            desc=content["desc"]
-        )
+        lab = Lab(name=name, desc=desc)
         db.add(lab)
-    with DB.session() as db:
-        lab = Lab.get(db, lab.id)
-        return lab, 201
+    return redirect(url_for('labs.get', lid=lab.id))
 
 
 @blue.route("/lab/<lid>", methods=["get"])
@@ -50,7 +46,7 @@ def get(lid):
 
 @blue.route("/lab/<lid>", methods=["put"])
 @handle_errors
-@validate(output_schema=schema, input_schema=input_schema)
+@validate(input_schema=input_schema)
 def put(content, lid):
     current_app.logger.info("Lab %s update" % lid)
     name = content["name"]
@@ -59,9 +55,7 @@ def put(content, lid):
         lab = Lab.get(db, lid)
         lab.set_name(name)
         lab.desc = desc
-    with DB.session() as db:
-        lab = Lab.get(db, lid)
-        return lab, 200
+    return redirect(url_for('labs.get', lid=lab.id))
 
 
 @blue.route("/lab/<lid>", methods=["delete"])

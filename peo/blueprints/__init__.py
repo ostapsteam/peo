@@ -1,6 +1,7 @@
 from functools import wraps
 
-from flask import jsonify, request
+from flask import jsonify, request, session, abort
+from werkzeug.wrappers import Response
 
 
 def get_error_resp(exc_dict):
@@ -17,9 +18,12 @@ def process_request(f, *args, input_schema=None, output_schema=None, **kwargs):
                 "status": 400,
                 "errors": errors
             })
-        body, status = f(content, *args, **kwargs)
+        resp = f(content, *args, **kwargs)
     else:
-        body, status = f(*args, **kwargs)
+        resp = f(*args, **kwargs)
+    if isinstance(resp, Response):
+        return resp
+    body, status = resp
     if output_schema:
         body, errors = output_schema.dump(body)
         if errors:
@@ -40,3 +44,12 @@ def validate(input_schema=None, output_schema=None):
                 f, *args, input_schema=input_schema, output_schema=output_schema, **kwargs)
         return wrap
     return decor
+
+
+def login_required(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if 'uid' in session:
+            return f(*args, **kwargs)
+        abort(401)
+    return wrap

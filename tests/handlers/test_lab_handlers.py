@@ -43,12 +43,7 @@ class LabHandlersTestCase(RestTestCase):
         }
 
         resp = self.peo.post("/labs", data=json.dumps(lab1), content_type="application/json")
-        self.assertEqual(resp.status_code, 201)
-
-        lab_resp = lab_schema.load(json.loads(resp.data)).data
-        self.assertIsNotNone(lab_resp["id"])
-        self.assertEqual(lab_resp["name"], lab1["name"])
-        self.assertEqual(lab_resp["desc"], lab1["desc"])
+        self.assertEqual(resp.status_code, 302)
 
         lab2 = {
             "name": "Lab2",
@@ -99,7 +94,7 @@ class LabHandlersTestCase(RestTestCase):
             data=json.dumps(req),
             content_type="application/json",
         )
-        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 302)
 
         resp = self.peo.get("/lab/{}".format(req["id"]))
         self.assertEqual(resp.status_code, 200)

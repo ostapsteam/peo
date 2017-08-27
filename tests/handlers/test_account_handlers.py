@@ -39,17 +39,17 @@ class AccountHandlersTestCase(RestTestCase):
         }
 
         resp = self.peo.post("/accounts", data=json.dumps(account1), content_type="application/json")
-        self.assertEqual(resp.status_code, 201)
-
-        account_resp = account_schema.load(json.loads(resp.data)).data
-        self.assertIsNotNone(account_resp["id"])
-        self.assertEqual(account_resp["login"], account1["login"])
+        self.assertEqual(resp.status_code, 302)
+        print(resp.headers["Location"])
 
         account2 = {
             "login": "account1",
             "password": "password2"
         }
         resp = self.peo.post("/accounts", data=json.dumps(account2), content_type="application/json")
+        self.assertEqual(resp.status_code, 400)
+
+        resp = self.peo.post("/accounts", data=json.dumps({}), content_type="application/json")
         self.assertEqual(resp.status_code, 400)
 
     def test_account_handler_put(self):
@@ -83,6 +83,13 @@ class AccountHandlersTestCase(RestTestCase):
         )
         self.assertEqual(resp.status_code, 400)
 
+        resp = self.peo.put(
+            "/account/{}".format(account1obj.id),
+            data=json.dumps({}),
+            content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, 400)
+
         req["login"] = account2["login"] + str(uuid.uuid4())
 
         resp = self.peo.put(
@@ -90,14 +97,14 @@ class AccountHandlersTestCase(RestTestCase):
             data=json.dumps(req),
             content_type="application/json",
         )
-        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 302)
 
         with DB.session() as session2:
             db_account = Account.get(session2, account1obj.id)
             self.assertNotEqual(account1["login"], db_account.login)
             self.assertNotEqual(account1passwd, db_account.passwd_hash)
 
-    def test_lab_handler_delete(self):
+    def test_account_handler_delete(self):
         login = "account1"
         password = "password"
 
@@ -109,3 +116,41 @@ class AccountHandlersTestCase(RestTestCase):
 
         with self.assertRaises(Account.DoesNotExist):
             Account.get(self.db_session(), account1.id)
+
+    def test_account_handler_accounts_login(self):
+        req = {
+            "login": "account1",
+            "password": "password1"
+        }
+
+        with DB.session() as session:
+            Account.create(session, req["login"], req["password"])
+
+        resp = self.peo.post(
+            "/accounts/login",
+            data=json.dumps(req),
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 302)
+
+    def test_account_handler_accounts_logout(self):
+        resp = self.peo.get("/accounts/logout")
+        self.assertEqual(resp.status_code, 401)
+
+        req = {
+            "login": "account1",
+            "password": "password1"
+        }
+
+        with DB.session() as session:
+            Account.create(session, req["login"], req["password"])
+
+        resp = self.peo.post(
+            "/accounts/login",
+            data=json.dumps(req),
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 302)
+
+        resp = self.peo.get("/accounts/logout")
+        self.assertEqual(resp.status_code, 204)

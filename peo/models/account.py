@@ -16,6 +16,9 @@ class Account(Base, Proto):
     class LoginAlreadyInUse(Exception):
         pass
 
+    class IncorrectLoginOrPassword(Exception):
+        pass
+
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
     login = sa.Column(sa.String(128), nullable=False, unique=True)
     passwd_hash = sa.Column(sa.String(128), nullable=False)
@@ -58,6 +61,13 @@ class Account(Base, Proto):
             if another and another.id != self.id:
                 raise Account.LoginAlreadyInUse
             self.login = login
+
+    @staticmethod
+    def check_login_and_password(session, login, password):
+        account = Account.get_by_login(session, login)
+        if account and account.check_password(password):
+            return account
+        raise Account.IncorrectLoginOrPassword
 
 
 class AccountSchema(Schema):

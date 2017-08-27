@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app
+from flask import Blueprint, current_app, redirect, url_for, session, abort
 from marshmallow import Schema, fields
 
 from peo.blueprints import validate
@@ -20,7 +20,7 @@ schema = AccountSchema()
 
 @blue.route("/accounts", methods=["post"])
 @handle_errors
-@validate(output_schema=schema, input_schema=input_schema)
+@validate(input_schema=input_schema)
 def post(content):
     current_app.logger.info("Account create")
     login = content["login"]
@@ -31,9 +31,7 @@ def post(content):
             raise Account.LoginAlreadyInUse
         account = Account.create(db, login, password)
         db.add(account)
-    with DB.session() as db:
-        account = Account.get(db, account.id)
-        return account, 201
+    return redirect(url_for('accounts.get', aid=account.id))
 
 
 @blue.route("/account/<aid>", methods=["get"])
@@ -48,7 +46,7 @@ def get(aid):
 
 @blue.route("/account/<aid>", methods=["put"])
 @handle_errors
-@validate(output_schema=schema, input_schema=input_schema)
+@validate(input_schema=input_schema)
 def put(content, aid):
     current_app.logger.info("Account %s update" % aid)
     login = content["login"]
@@ -58,9 +56,7 @@ def put(content, aid):
         account.set_login(login)
         if password:
             account.set_password(password)
-    with DB.session() as db:
-        account = Account.get(db, account.id)
-        return account, 200
+    return redirect(url_for('accounts.get', aid=account.id))
 
 
 @blue.route("/account/<aid>", methods=["delete"])
@@ -71,6 +67,29 @@ def delete(aid):
         account = Account.get(db, aid)
         account.delete()
         return "", 204
+
+
+@blue.route("/accounts/login", methods=["post"])
+@handle_errors
+@validate(input_schema=input_schema)
+def login(content):
+    current_app.logger.info("Account login")
+    login = content["login"]
+    password = content["password"]
+    with DB.session() as db:
+        account = Account.check_login_and_password(db, login, password)
+        session["uid"] = account.id
+    return redirect(url_for('accounts.get', aid=account.id))
+
+
+@blue.route("/accounts/logout", methods=["get"])
+@handle_errors
+def logout():
+    current_app.logger.info("Account logout")
+    if "uid" not in session:
+        abort(401)
+    session.pop("uid", None)
+    return "", 204
 
 
 __all__ = "blue"

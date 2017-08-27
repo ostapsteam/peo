@@ -25,6 +25,7 @@ else:
     config = {}
 
 app = Flask(__name__)
+app.secret_key = config.get("secret_key", "kshdffhs")
 app.config.update(config)
 app.register_blueprint(lab.blue)
 app.register_blueprint(account.blue)

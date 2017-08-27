@@ -13,4 +13,6 @@ def handle_errors(f):
             return get_error_resp({"message": "Account with that ID no longer exists.", "status": 404})
         except Account.LoginAlreadyInUse:
             return get_error_resp({"message": "Account with that name already exists.", "status": 400})
+        except Account.IncorrectLoginOrPassword:
+            return get_error_resp({"message": "Incorrect login or password", "status": 400})
     return wrap
