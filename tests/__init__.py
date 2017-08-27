@@ -1,16 +1,15 @@
 import os
 from tempfile import mktemp
-from threading import Thread
 from unittest import TestCase
 
-import logging
-from sqlalchemy import create_engine
-from alembic.config import Config
 from alembic.command import upgrade as upgrade_database
+from alembic.config import Config
+from sqlalchemy import create_engine
 
-from peo.db import DB
 import peo
 from peo.app import app
+from peo.db import DB
+
 
 class DBTestCase(TestCase):
 
