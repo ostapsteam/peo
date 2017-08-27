@@ -1,6 +1,6 @@
 from functools import wraps
 
-from peo.blueprints import get_error_resp
+from peo.blueprints import get_error_resp, process_request
 from peo.models.account import Account
 
 

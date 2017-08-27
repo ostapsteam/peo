@@ -12,7 +12,7 @@ class DB:
 
     @classmethod
     def configure(cls, engine):
-        cls.Session = sessionmaker(bind=engine, query_cls=BaseQuery)
+        cls.Session = sessionmaker(bind=engine, query_cls=BaseQuery, expire_on_commit=False)
 
     @classmethod
     @contextmanager
@@ -21,11 +21,10 @@ class DB:
         s = cls.Session()
         try:
             yield s
-        except Exception as e:
-            print(str(e))
+            s.flush()
+            s.commit()
+        except:
             s.rollback()
             raise
-        else:
-            s.commit()
         finally:
             s.close()

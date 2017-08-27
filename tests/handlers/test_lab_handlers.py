@@ -1,33 +1,32 @@
 import json
 import uuid
 
+from peo.db import DB
 from peo.models.lab import Lab, LabSchema
 from tests import RestTestCase
 
 
 lab_schema = LabSchema()
 
+
 class LabHandlersTestCase(RestTestCase):
 
     def setUp(self):
         super().setUp()
 
-    def test_lab_hadler_get(self):
-        session = self.db_session()
-
+    def test_lab_handler_get(self):
         resp = self.peo.get("/lab/0")
         self.assertEqual(resp.status_code, 404)
 
         name = "Lab1"
         desc = "Test desc"
 
-        lab1 = Lab(
-            name=name,
-            desc=desc
-        )
-        session.add(lab1)
-        session.flush()
-        session.commit()
+        with DB.session() as session:
+            lab1 = Lab(
+                name=name,
+                desc=desc
+            )
+            session.add(lab1)
 
         resp = self.peo.get("/lab/{}".format(lab1.id))
         self.assertEqual(resp.status_code, 200)
@@ -37,7 +36,7 @@ class LabHandlersTestCase(RestTestCase):
         self.assertEqual(lab_resp["name"], lab1.name)
         self.assertEqual(lab_resp["desc"], lab1.desc)
 
-    def test_lab_hadler_post(self):
+    def test_lab_handler_post(self):
         lab1 = {
             "name": "Lab2",
             "desc": "Test desc2"
@@ -58,10 +57,7 @@ class LabHandlersTestCase(RestTestCase):
         resp = self.peo.post("/labs", data=json.dumps(lab2), content_type="application/json")
         self.assertEqual(resp.status_code, 400)
 
-
-    def test_lab_hadler_put(self):
-        session = self.db_session()
-
+    def test_lab_handler_put(self):
         lab1 = {
             "name": "Lab1",
             "desc": "Test desc 1"
@@ -74,17 +70,16 @@ class LabHandlersTestCase(RestTestCase):
         resp = self.peo.put("/lab/0", data=json.dumps(lab1), content_type="application/json")
         self.assertEqual(resp.status_code, 404)
 
-        lab1obj = Lab(
-            name=lab1["name"],
-            desc=lab1["desc"]
-        )
-        lab2obj = Lab(
-            name=lab2["name"],
-            desc=lab2["desc"]
-        )
-        session.add_all([lab1obj, lab2obj])
-        session.flush()
-        session.commit()
+        with DB.session() as session:
+            lab1obj = Lab(
+                name=lab1["name"],
+                desc=lab1["desc"]
+            )
+            lab2obj = Lab(
+                name=lab2["name"],
+                desc=lab2["desc"]
+            )
+            session.add_all([lab1obj, lab2obj])
 
         req = lab1.copy()
         req["name"] = lab2["name"]
@@ -114,19 +109,16 @@ class LabHandlersTestCase(RestTestCase):
         self.assertEqual(lab_resp["name"], req["name"])
         self.assertEqual(lab_resp["desc"], req["desc"])
 
-    def test_lab_hadler_delete(self):
-        session = self.db_session()
-
+    def test_lab_handler_delete(self):
         name = "Lab1"
         desc = "Test desc"
 
-        lab1 = Lab(
-            name=name,
-            desc=desc
-        )
-        session.add(lab1)
-        session.flush()
-        session.commit()
+        with DB.session() as session:
+            lab1 = Lab(
+                name=name,
+                desc=desc
+            )
+            session.add(lab1)
 
         resp = self.peo.delete("/lab/{}".format(lab1.id))
         self.assertEqual(resp.status_code, 204)

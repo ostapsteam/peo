@@ -1,18 +1,28 @@
 from flask import Blueprint, request, jsonify, current_app
+from marshmallow import Schema, fields
 
+from peo.blueprints import validate
 from peo.blueprints.labs.errors import handle_errors
 from peo.db import DB
 from peo.models.lab import Lab, LabSchema
 
 blue = Blueprint("labs", __name__)
 
+
+class InputSchema(Schema):
+    name = fields.Str(required=True)
+    desc = fields.Str()
+
+
+input_schema = InputSchema()
 schema = LabSchema()
+
 
 @blue.route("/labs", methods=["post"])
 @handle_errors
-def post():
+@validate(output_schema=schema, input_schema=input_schema)
+def post(content):
     current_app.logger.info("Lab create")
-    content = request.get_json(silent=False)
     name = content["name"]
     with DB.session() as db:
         lab = Lab.get_by_name(db, name)
@@ -23,32 +33,35 @@ def post():
             desc=content["desc"]
         )
         db.add(lab)
-        db.flush()
-        return jsonify(schema.dump(lab).data), 201
+    with DB.session() as db:
+        lab = Lab.get(db, lab.id)
+        return lab, 201
 
 
 @blue.route("/lab/<lid>", methods=["get"])
+@validate(output_schema=schema)
 @handle_errors
 def get(lid):
     current_app.logger.info("Lab %s read" % lid)
     with DB.session() as db:
         lab = Lab.get(db, lid)
-        return jsonify(schema.dump(lab).data), 200
+        return lab, 200
 
 
 @blue.route("/lab/<lid>", methods=["put"])
 @handle_errors
-def put(lid):
+@validate(output_schema=schema, input_schema=input_schema)
+def put(content, lid):
     current_app.logger.info("Lab %s update" % lid)
-    content = request.get_json(silent=False)
     name = content["name"]
     desc = content["desc"]
     with DB.session() as db:
         lab = Lab.get(db, lid)
         lab.set_name(name)
         lab.desc = desc
-        db.flush()
-        return jsonify(schema.dump(lab).data), 200
+    with DB.session() as db:
+        lab = Lab.get(db, lid)
+        return lab, 200
 
 
 @blue.route("/lab/<lid>", methods=["delete"])

@@ -1,5 +1,7 @@
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, current_app
+from marshmallow import Schema, fields
 
+from peo.blueprints import validate
 from peo.blueprints.accounts.errors import handle_errors
 from peo.db import DB
 from peo.models.account import Account, AccountSchema
@@ -7,13 +9,20 @@ from peo.models.account import Account, AccountSchema
 blue = Blueprint("accounts", __name__)
 
 
+class InputSchema(Schema):
+    login = fields.Str(required=True)
+    password = fields.Str()
+
+
+input_schema = InputSchema()
 schema = AccountSchema()
+
 
 @blue.route("/accounts", methods=["post"])
 @handle_errors
-def post():
+@validate(output_schema=schema, input_schema=input_schema)
+def post(content):
     current_app.logger.info("Account create")
-    content = request.get_json(silent=False)
     login = content["login"]
     password = content["password"]
     with DB.session() as db:
@@ -22,24 +31,26 @@ def post():
             raise Account.LoginAlreadyInUse
         account = Account.create(db, login, password)
         db.add(account)
-        db.flush()
-        return jsonify(schema.dump(account).data), 201
+    with DB.session() as db:
+        account = Account.get(db, account.id)
+        return account, 201
 
 
 @blue.route("/account/<aid>", methods=["get"])
 @handle_errors
+@validate(output_schema=schema)
 def get(aid):
     current_app.logger.info("Account %s read" % aid)
     with DB.session() as db:
         account = Account.get(db, aid)
-        return jsonify(schema.dump(account).data), 200
+        return account, 200
 
 
 @blue.route("/account/<aid>", methods=["put"])
 @handle_errors
-def put(aid):
+@validate(output_schema=schema, input_schema=input_schema)
+def put(content, aid):
     current_app.logger.info("Account %s update" % aid)
-    content = request.get_json(silent=False)
     login = content["login"]
     password = content["password"]
     with DB.session() as db:
@@ -47,8 +58,9 @@ def put(aid):
         account.set_login(login)
         if password:
             account.set_password(password)
-        db.flush()
-        return jsonify(schema.dump(account).data), 200
+    with DB.session() as db:
+        account = Account.get(db, account.id)
+        return account, 200
 
 
 @blue.route("/account/<aid>", methods=["delete"])
