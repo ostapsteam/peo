@@ -20,7 +20,7 @@ schema = LabSchema()
 
 @blue.route("/labs", methods=["post"])
 @handle_errors
-@validate(input_schema=input_schema)
+@validate(input_schema=input_schema, output_schema=schema)
 def post(content):
     current_app.logger.info("Lab create")
     name = content["name"]
@@ -31,7 +31,10 @@ def post(content):
             raise Lab.NameAlreadyInUse
         lab = Lab(name=name, desc=desc)
         db.add(lab)
-    return redirect(url_for('labs.get', lid=lab.id))
+
+    with DB.session() as db:
+        lab = Lab.get(db, lab.id)
+        return lab, 201
 
 
 @blue.route("/lab/<lid>", methods=["get"])
@@ -46,7 +49,7 @@ def get(lid):
 
 @blue.route("/lab/<lid>", methods=["put"])
 @handle_errors
-@validate(input_schema=input_schema)
+@validate(input_schema=input_schema, output_schema=schema)
 def put(content, lid):
     current_app.logger.info("Lab %s update" % lid)
     name = content["name"]
@@ -55,7 +58,9 @@ def put(content, lid):
         lab = Lab.get(db, lid)
         lab.set_name(name)
         lab.desc = desc
-    return redirect(url_for('labs.get', lid=lab.id))
+    with DB.session() as db:
+        lab = Lab.get(db, lid)
+        return lab, 200
 
 
 @blue.route("/lab/<lid>", methods=["delete"])

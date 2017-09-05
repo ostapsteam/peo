@@ -1,6 +1,8 @@
 from functools import wraps
 
-from flask import jsonify, request, session, abort
+from flask import jsonify, request, session, g
+from marshmallow import Schema,fields
+from peo.models.account import Account
 from werkzeug.wrappers import Response
 
 
@@ -32,8 +34,8 @@ def process_request(f, *args, input_schema=None, output_schema=None, **kwargs):
                 "status": 500,
                 "errors": errors
             })
-        body = jsonify(body)
-    return body, status
+
+    return jsonify(body), status
 
 
 def validate(input_schema=None, output_schema=None):
@@ -51,5 +53,18 @@ def login_required(f):
     def wrap(*args, **kwargs):
         if 'uid' in session:
             return f(*args, **kwargs)
-        abort(401)
+        raise Account.Unauthorized
+    return wrap
+
+
+def with_common_errors(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except Account.Unauthorized:
+            return get_error_resp({
+                "message": "Unauthorized",
+                "status": 401
+            })
     return wrap

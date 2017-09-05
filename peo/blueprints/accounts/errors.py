@@ -1,9 +1,11 @@
 from functools import wraps
 
-from peo.blueprints import get_error_resp, process_request
+from peo.blueprints import get_error_resp
+from peo.blueprints import with_common_errors
 from peo.models.account import Account
 
 
+@with_common_errors
 def handle_errors(f):
     @wraps(f)
     def wrap(*args, **kwargs):

@@ -1,14 +1,14 @@
+import json
 import os
 from tempfile import mktemp
 from unittest import TestCase
 
+import peo
 from alembic.command import upgrade as upgrade_database
 from alembic.config import Config
-from sqlalchemy import create_engine
-
-import peo
 from peo.app import app
 from peo.db import DB
+from sqlalchemy import create_engine
 
 
 class DBTestCase(TestCase):
@@ -43,3 +43,10 @@ class RestTestCase(DBTestCase):
         self.peo.testing = True
         self.peo = self.peo.test_client()
         super().setUp()
+
+    @classmethod
+    def resp_to_json(cls, resp):
+        return json.loads(resp.data.decode("utf-8"))
+
+    def check_http_status(self, resp, status):
+        self.assertEqual(resp.status_code, status, resp.data)

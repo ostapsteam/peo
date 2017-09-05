@@ -1,6 +1,7 @@
-from flask import Blueprint, current_app, redirect, url_for, session, abort
-from marshmallow import Schema, fields
+from datetime import datetime
 
+from flask import Blueprint, current_app, session
+from marshmallow import Schema, fields
 from peo.blueprints import validate
 from peo.blueprints.accounts.errors import handle_errors
 from peo.db import DB
@@ -20,7 +21,7 @@ schema = AccountSchema()
 
 @blue.route("/accounts", methods=["post"])
 @handle_errors
-@validate(input_schema=input_schema)
+@validate(input_schema=input_schema, output_schema=schema)
 def post(content):
     current_app.logger.info("Account create")
     login = content["login"]
@@ -31,7 +32,9 @@ def post(content):
             raise Account.LoginAlreadyInUse
         account = Account.create(db, login, password)
         db.add(account)
-    return redirect(url_for('accounts.get', aid=account.id))
+    with DB.session() as db:
+        account = Account.get(db, account.id)
+        return account, 201
 
 
 @blue.route("/account/<aid>", methods=["get"])
@@ -46,7 +49,7 @@ def get(aid):
 
 @blue.route("/account/<aid>", methods=["put"])
 @handle_errors
-@validate(input_schema=input_schema)
+@validate(input_schema=input_schema, output_schema=schema)
 def put(content, aid):
     current_app.logger.info("Account %s update" % aid)
     login = content["login"]
@@ -56,7 +59,9 @@ def put(content, aid):
         account.set_login(login)
         if password:
             account.set_password(password)
-    return redirect(url_for('accounts.get', aid=account.id))
+    with DB.session() as db:
+        account = Account.get(db, aid)
+        return account, 200
 
 
 @blue.route("/account/<aid>", methods=["delete"])
@@ -80,7 +85,8 @@ def login(content):
         with DB.session() as db:
             account = Account.check_login_and_password(db, login, password)
             session["uid"] = account.id
-    return redirect(url_for('accounts.get', aid=session["uid"]))
+            account.last_login = datetime.utcnow()
+    return "", 204
 
 
 @blue.route("/accounts/logout", methods=["get"])

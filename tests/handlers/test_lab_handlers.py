@@ -16,7 +16,7 @@ class LabHandlersTestCase(RestTestCase):
 
     def test_lab_handler_get(self):
         resp = self.peo.get("/lab/0")
-        self.assertEqual(resp.status_code, 404)
+        self.check_http_status(resp, 404)
 
         name = "Lab1"
         desc = "Test desc"
@@ -29,9 +29,9 @@ class LabHandlersTestCase(RestTestCase):
             session.add(lab1)
 
         resp = self.peo.get("/lab/{}".format(lab1.id))
-        self.assertEqual(resp.status_code, 200)
+        self.check_http_status(resp, 200)
 
-        lab_resp = lab_schema.load(json.loads(resp.data)).data
+        lab_resp = self.resp_to_json(resp)
         self.assertEqual(lab_resp["id"], lab1.id)
         self.assertEqual(lab_resp["name"], lab1.name)
         self.assertEqual(lab_resp["desc"], lab1.desc)
@@ -41,7 +41,7 @@ class LabHandlersTestCase(RestTestCase):
             lab1.delete()
 
         resp = self.peo.get("/lab/{}".format(lab1.id))
-        self.assertEqual(resp.status_code, 404)
+        self.check_http_status(resp, 404)
 
     def test_lab_handler_post(self):
         lab1 = {
@@ -50,14 +50,14 @@ class LabHandlersTestCase(RestTestCase):
         }
 
         resp = self.peo.post("/labs", data=json.dumps(lab1), content_type="application/json")
-        self.assertEqual(resp.status_code, 302)
+        self.check_http_status(resp, 201)
 
         lab2 = {
             "name": "Lab2",
             "desc": "Test desc333"
         }
         resp = self.peo.post("/labs", data=json.dumps(lab2), content_type="application/json")
-        self.assertEqual(resp.status_code, 400)
+        self.check_http_status(resp, 400)
 
     def test_lab_handler_put(self):
         lab1 = {
@@ -70,7 +70,7 @@ class LabHandlersTestCase(RestTestCase):
         }
 
         resp = self.peo.put("/lab/0", data=json.dumps(lab1), content_type="application/json")
-        self.assertEqual(resp.status_code, 404)
+        self.check_http_status(resp, 404)
 
         with DB.session() as session:
             lab1obj = Lab(
@@ -92,8 +92,7 @@ class LabHandlersTestCase(RestTestCase):
             data=json.dumps(req),
             content_type="application/json",
         )
-        self.assertEqual(resp.status_code, 400)
-
+        self.check_http_status(resp, 400)
         req["name"] = lab2["name"] + str(uuid.uuid4())
 
         resp = self.peo.put(
@@ -101,12 +100,11 @@ class LabHandlersTestCase(RestTestCase):
             data=json.dumps(req),
             content_type="application/json",
         )
-        self.assertEqual(resp.status_code, 302)
-
+        self.check_http_status(resp,200)
         resp = self.peo.get("/lab/{}".format(req["id"]))
-        self.assertEqual(resp.status_code, 200)
+        self.check_http_status(resp, 200)
 
-        lab_resp = lab_schema.load(json.loads(resp.data)).data
+        lab_resp = self.resp_to_json(resp)
         self.assertEqual(lab_resp["id"], req["id"])
         self.assertEqual(lab_resp["name"], req["name"])
         self.assertEqual(lab_resp["desc"], req["desc"])
@@ -120,7 +118,7 @@ class LabHandlersTestCase(RestTestCase):
             data=json.dumps(req),
             content_type="application/json",
         )
-        self.assertEqual(resp.status_code, 404)
+        self.check_http_status(resp, 404)
 
     def test_lab_handler_delete(self):
         name = "Lab1"

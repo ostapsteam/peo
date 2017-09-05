@@ -1,7 +1,10 @@
 import argparse
 import logging
+import uuid
 
-from flask import Flask
+import time
+
+from flask import Flask, g
 from gunicorn.app.base import Application
 from sqlalchemy import create_engine
 
@@ -15,6 +18,12 @@ log = logging.getLogger(__file__)
 
 app = Flask(__name__)
 app.secret_key = app.config.get("secret_key", "default_key_21")
+
+
+@app.before_request
+def set_request_id():
+    g.request_id = str(uuid.uuid4())
+
 
 app.register_blueprint(lab.blue)
 app.register_blueprint(account.blue)

@@ -19,6 +19,9 @@ class Account(Base, Proto):
     class IncorrectLoginOrPassword(Exception):
         pass
 
+    class Unauthorized(Exception):
+        pass
+
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
     login = sa.Column(sa.String(128), nullable=False, unique=True)
     passwd_hash = sa.Column(sa.String(128), nullable=False)
