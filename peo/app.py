@@ -8,7 +8,7 @@ import uuid
 import time
 
 import peo
-from flask import Flask, g, jsonify
+from flask import Flask, g, jsonify, request
 from gunicorn.app.base import Application
 from peo.blueprints import get_error_resp
 from sqlalchemy import create_engine
@@ -39,8 +39,13 @@ def app_info():
     return jsonify(name="peo", version=peo.VERSION)
 
 
-@app.route("/travis/hook", methods=["post"])
+@app.route("/travisci")
 def travis_hook():
+    if request.remote_addr not in ("54.173.229.200", "54.175.230.252"):
+        return get_error_resp({
+            "message": "It's only for Travis",
+            "status": 403,
+        })
     if "pid" not in app.config:
         return get_error_resp({
             "message": " Can't reload app. Pidfile wasn't set",
