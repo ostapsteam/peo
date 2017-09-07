@@ -41,11 +41,11 @@ def app_info():
 
 @app.route("/travisci")
 def travis_hook():
-    if request.remote_addr not in ("54.173.229.200", "54.175.230.252"):
-        return get_error_resp({
-            "message": "It's only for Travis",
-            "status": 403,
-        })
+    # if request.remote_addr not in ("54.173.229.200", "54.175.230.252"):
+    #     return get_error_resp({
+    #         "message": "It's only for Travis",
+    #         "status": 403,
+    #     })
     if "pid" not in app.config:
         return get_error_resp({
             "message": " Can't reload app. Pidfile wasn't set",
