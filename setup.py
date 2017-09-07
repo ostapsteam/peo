@@ -6,9 +6,13 @@ with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
 
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
+import sys
+sys.path.append(".")
+import peo
+
 setup(
     name='peo',
-    version='0.31',
+    version='{}.{}'.format(*peo.VERSION),
     packages=find_packages(),
     include_package_data=True,
     license='BSD License',  # example license

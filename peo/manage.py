@@ -15,7 +15,7 @@ def main():
             "--app-config",
             dest="app_config",
             required=True,
-            help="Config for app"
+            help="Config for app",
         )
 
         options = alembic.parser.parse_args()
