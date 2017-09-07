@@ -51,7 +51,7 @@ def travis_hook():
             "message": " Can't reload app. Pidfile wasn't set",
             "status": 400,
         })
-    subprocess.check_call(["pip", "install", "peo", "--upgrade"])
+    subprocess.check_call(["pip", "install", "peo", "--upgrade", "-i", "https://test.pypi.org/legacy/"])
     subprocess.check_call(["peo-database-manage", "--app-config", app.config["CURRENT_CONFIG"], "upgrade", "head"])
     with open(app.config["pid"]) as pidfile:
         os.kill(int(pidfile.read().strip()), signal.SIGHUP)
