@@ -51,8 +51,16 @@ def travis_hook():
             "message": " Can't reload app. Pidfile wasn't set",
             "status": 400,
         })
-    subprocess.check_call(["pip", "install", "peo", "-i", "https://test.pypi.org/simple/", "--no-cache"])
-    subprocess.check_call(["peo-database-manage", "--app-config", app.config["CURRENT_CONFIG"], "upgrade", "head"])
+
+    def venv(x):
+        v = app.config.get("venv", "")
+        if v:
+            return os.path.join(v, x)
+        return x
+
+    subprocess.check_call([venv("pip"), "install", "peo", "-i", "https://test.pypi.org/simple/", "--no-cache"])
+    subprocess.check_call(
+        [venv("peo-database-manage"), "--app-config", app.config["CURRENT_CONFIG"], "upgrade", "head"])
     with open(app.config["pid"]) as pidfile:
         os.kill(int(pidfile.read().strip()), signal.SIGHUP)
     return "", 204
