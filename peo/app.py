@@ -73,7 +73,7 @@ def main():
             def init(self, *args, **kwargs):
                 return {
                     'workers': app.config["workers"],
-                    'pid': app.config["pid"]
+                    'pidfile': app.config["pid"]
                 }
 
             def load(self):
