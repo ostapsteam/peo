@@ -1,6 +1,7 @@
 import argparse
 import logging
 import os
+import signal
 import subprocess
 import uuid
 
@@ -48,7 +49,7 @@ def travis_hook():
     subprocess.check_call(["pip", "install", "peo", "--upgrade"])
     subprocess.check_call(["peo-database-manage", "--app-config", app.config["CURRENT_CONFIG"], "upgrade", "head"])
     with open(app.config["pid"]) as pidfile:
-        os.kill(int(pidfile.read().strip()))
+        os.kill(int(pidfile.read().strip()), signal.SIGHUP)
     return "", 204
 
 
