@@ -52,17 +52,6 @@ def travis_hook():
     return "", 204
 
 
-class PeoApplication(Application):
-    def init(self, *args, **kwargs):
-        return {
-            'workers': app.config["workers"],
-            'pid': app.config["pid"]
-        }
-
-    def load(self):
-        return app
-
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", dest="config", help="Config file")
@@ -79,4 +68,15 @@ def main():
         app.run(debug=True)
     else:
         log.info("Run in war mode")
+
+        class PeoApplication(Application):
+            def init(self, *args, **kwargs):
+                return {
+                    'workers': app.config["workers"],
+                    'pid': app.config["pid"]
+                }
+
+            def load(self):
+                return app
+
         PeoApplication().run()
