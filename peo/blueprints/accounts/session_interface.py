@@ -13,14 +13,13 @@ class ItsdangerousSession(CallbackDict, SessionMixin):
 
 
 class ItsdangerousSessionInterface(SessionInterface):
-    salt = 'cookie-session'
+    salt = 'my-serious-session'
     session_class = ItsdangerousSession
 
     def get_serializer(self, app):
         if not app.secret_key:
             return None
-        return URLSafeTimedSerializer(app.secret_key,
-                                      salt=self.salt)
+        return URLSafeTimedSerializer(app.secret_key, salt=self.salt)
 
     def open_session(self, app, request):
         s = self.get_serializer(app)
