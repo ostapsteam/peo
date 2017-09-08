@@ -57,6 +57,7 @@ def travis_hook():
         })
 
     pip.main(["install", "peo", "-i", "https://test.pypi.org/simple/", "--no-cache"])
+
     alembic_cfg = Config(
         os.path.join(
             os.path.dirname(os.path.abspath(__file__)),
