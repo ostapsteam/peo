@@ -67,6 +67,7 @@ def travis_hook():
 
     with open(app.config["pid"]) as pidfile:
         os.kill(int(pidfile.read().strip()), signal.SIGHUP)
+
     return "", 204
 
 
