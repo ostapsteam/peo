@@ -8,6 +8,9 @@ import uuid
 import time
 
 import peo
+import pip
+from alembic import command
+from alembic.config import Config
 from flask import Flask, g, jsonify, request
 from gunicorn.app.base import Application
 from peo.blueprints import get_error_resp
@@ -39,8 +42,9 @@ def app_info():
     return jsonify(name="peo", version=peo.VERSION)
 
 
-@app.route("/travisci")
+@app.route("/travisci", methods=["get", "post"])
 def travis_hook():
+    app.logger.info("Travis CI call from %s", request.remote_addr)
     # if request.remote_addr not in ("54.173.229.200", "54.175.230.252"):
     #     return get_error_resp({
     #         "message": "It's only for Travis",
@@ -52,15 +56,10 @@ def travis_hook():
             "status": 400,
         })
 
-    def venv(x):
-        v = app.config.get("venv", "")
-        if v:
-            return os.path.join(v, x)
-        return x
+    pip.main(["install", "peo", "-i", "https://test.pypi.org/simple/", "--no-cache"])
+    alembic_cfg = Config(app.config["CURRENT_CONFIG"])
+    command.upgrade(alembic_cfg, "head")
 
-    subprocess.check_call([venv("pip"), "install", "peo", "-i", "https://test.pypi.org/simple/", "--no-cache"])
-    subprocess.check_call(
-        [venv("peo-database-manage"), "--app-config", app.config["CURRENT_CONFIG"], "upgrade", "head"])
     with open(app.config["pid"]) as pidfile:
         os.kill(int(pidfile.read().strip()), signal.SIGHUP)
     return "", 204
