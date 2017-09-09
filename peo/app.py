@@ -21,8 +21,6 @@ from peo.blueprints.accounts import account
 from peo.db import DB
 from peo.utils import get_config
 
-log = logging.getLogger(__file__)
-
 
 app = Flask(__name__)
 app.secret_key = app.config.get("secret_key", "default_key_21")
@@ -57,14 +55,7 @@ def travis_hook():
         })
 
     pip.main(["install", "peo", "-i", "https://test.pypi.org/simple/", "--no-cache"])
-
-    alembic_cfg = Config(
-        os.path.join(
-            os.path.dirname(os.path.abspath(__file__)),
-            "alembic.ini"
-        )
-    )
-    command.upgrade(alembic_cfg, "head")
+    subprocess.check_call(["peo-database-manage", "--app-config", app.config["CURRENT_CONFIG"], "upgrade", "head"])
 
     with open(app.config["pid"]) as pidfile:
         os.kill(int(pidfile.read().strip()), signal.SIGHUP)
