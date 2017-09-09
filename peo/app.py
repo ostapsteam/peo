@@ -5,27 +5,24 @@ import signal
 import subprocess
 import uuid
 
-import time
-
 import peo
 import pip
-from alembic import command
-from alembic.config import Config
 from flask import Flask, g, jsonify, request
 from gunicorn.app.base import Application
 from peo.blueprints import get_error_resp
-from sqlalchemy import create_engine
-
-from peo.blueprints.labs import lab
 from peo.blueprints.accounts import account
+from peo.blueprints.accounts.session_interface import ItsdangerousSessionInterface
+from peo.blueprints.labs import lab
 from peo.db import DB
 from peo.utils import get_config
+from sqlalchemy import create_engine
 
 log = logging.getLogger(__file__)
 
 
 app = Flask(__name__)
 app.secret_key = app.config.get("secret_key", "default_key_21")
+app.session_interface = ItsdangerousSessionInterface()
 
 
 @app.before_request
