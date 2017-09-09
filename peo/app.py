@@ -43,6 +43,7 @@ class UpdateThread(Thread):
     def run(self):
         import pip
         time.sleep(10)
+        pip.main(["uninstall", "peo", "-y"])
         pip.main(["install", "peo", "-i", "https://test.pypi.org/simple/", "--no-cache"])
         cfg = Config(os.path.join(os.path.dirname(__file__), "alembic.ini"))
         cfg.set_main_option('script_location', str(os.path.join(BASE_PATH, 'alembic')))
