@@ -9,7 +9,6 @@ from threading import Thread
 import time
 
 import peo
-import pip
 from alembic import command
 from alembic.config import Config
 from flask import Flask, g, jsonify, request
@@ -42,9 +41,8 @@ app.register_blueprint(account.blue)
 class UpdateThread(Thread):
 
     def run(self):
-        log.info("take update notification")
+        import pip
         time.sleep(10)
-        log.info("update")
         pip.main(["install", "peo", "-i", "https://test.pypi.org/simple/", "--no-cache"])
         cfg = Config(os.path.join(os.path.dirname(__file__), "alembic.ini"))
         cfg.set_main_option('script_location', str(os.path.join(BASE_PATH, 'alembic')))
@@ -63,18 +61,18 @@ def app_info():
 @app.route("/travisci", methods=["post"])
 def travis_hook():
     app.logger.info("Travis CI call from %s", request.remote_addr)
-    if request.remote_addr not in ("54.173.229.200", "54.175.230.252"):
-        return get_error_resp({
-            "message": "It's only for Travis",
-            "status": 403,
-        })
+    # if request.remote_addr not in ("54.173.229.200", "54.175.230.252"):
+    #     return get_error_resp({
+    #         "message": "It's only for Travis",
+    #         "status": 403,
+    #     })
     if "pid" not in app.config:
         return get_error_resp({
             "message": " Can't reload app. Pidfile wasn't set",
             "status": 400,
         })
 
-    UpdateThread.start()
+    UpdateThread().start()
 
     return "", 204
 
