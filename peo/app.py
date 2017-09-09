@@ -4,6 +4,9 @@ import os
 import signal
 import subprocess
 import uuid
+from threading import Thread
+
+import time
 
 import peo
 import pip
@@ -36,6 +39,22 @@ app.register_blueprint(lab.blue)
 app.register_blueprint(account.blue)
 
 
+class UpdateThread(Thread):
+
+    def run(self):
+        log.info("take update notification")
+        time.sleep(10)
+        log.info("update")
+        pip.main(["install", "peo", "-i", "https://test.pypi.org/simple/", "--no-cache"])
+        cfg = Config(os.path.join(os.path.dirname(__file__), "alembic.ini"))
+        cfg.set_main_option('script_location', str(os.path.join(BASE_PATH, 'alembic')))
+        cfg.set_main_option('sqlalchemy.url', str(app.config['database']))
+        command.upgrade(cfg, "head")
+
+        with open(app.config["pid"]) as pidfile:
+            os.kill(int(pidfile.read().strip()), signal.SIGHUP)
+
+
 @app.route("/", methods=["get"])
 def app_info():
     return jsonify(name="peo", version=peo.VERSION)
@@ -55,14 +74,7 @@ def travis_hook():
             "status": 400,
         })
 
-    pip.main(["install", "peo", "-i", "https://test.pypi.org/simple/", "--no-cache"])
-    cfg = Config(os.path.join(os.path.dirname(__file__), "alembic.ini"))
-    cfg.set_main_option('script_location', str(os.path.join(BASE_PATH, 'alembic')))
-    cfg.set_main_option('sqlalchemy.url', str(app.config['database']))
-    command.upgrade(cfg, "head")
-
-    with open(app.config["pid"]) as pidfile:
-        os.kill(int(pidfile.read().strip()), signal.SIGHUP)
+    UpdateThread.start()
 
     return "", 204
 
