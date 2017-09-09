@@ -7,6 +7,8 @@ import uuid
 
 import peo
 import pip
+from alembic import command
+from alembic.config import Config
 from flask import Flask, g, jsonify, request
 from gunicorn.app.base import Application
 from peo.blueprints import get_error_resp
@@ -18,7 +20,7 @@ from peo.utils import get_config
 from sqlalchemy import create_engine
 
 log = logging.getLogger(__file__)
-
+BASE_PATH = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
 app.secret_key = app.config.get("secret_key", "default_key_21")
@@ -54,7 +56,10 @@ def travis_hook():
         })
 
     pip.main(["install", "peo", "-i", "https://test.pypi.org/simple/", "--no-cache"])
-    subprocess.check_call(["peo-database-manage", "--app-config", app.config["CURRENT_CONFIG"], "upgrade", "head"])
+    cfg = Config(os.path.join(os.path.dirname(__file__), "alembic.ini"))
+    cfg.set_main_option('script_location', str(os.path.join(BASE_PATH, 'alembic')))
+    cfg.set_main_option('sqlalchemy.url', str(app.config['database']))
+    command.upgrade(cfg, "head")
 
     with open(app.config["pid"]) as pidfile:
         os.kill(int(pidfile.read().strip()), signal.SIGHUP)
