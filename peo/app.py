@@ -21,6 +21,8 @@ from peo.blueprints.accounts import account
 from peo.db import DB
 from peo.utils import get_config
 
+log = logging.getLogger(__file__)
+
 
 app = Flask(__name__)
 app.secret_key = app.config.get("secret_key", "default_key_21")
