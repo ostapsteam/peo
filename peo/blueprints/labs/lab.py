@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app, redirect, url_for
+from flask import Blueprint, current_app
 from marshmallow import Schema, fields
 
 from peo.blueprints import validate

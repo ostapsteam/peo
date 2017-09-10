@@ -2,7 +2,6 @@ import argparse
 import logging
 import os
 import signal
-import subprocess
 import uuid
 from threading import Thread
 
@@ -11,7 +10,7 @@ import time
 import peo
 from alembic import command
 from alembic.config import Config
-from flask import Flask, g, jsonify, request
+from flask import Flask, g,current_app, jsonify, request
 from gunicorn.app.base import Application
 from peo.blueprints import get_error_resp
 from peo.blueprints.accounts import account
@@ -43,8 +42,7 @@ class UpdateThread(Thread):
     def run(self):
         import pip
         time.sleep(10)
-        pip.main(["uninstall", "peo", "-y"])
-        pip.main(["install", "peo", "-i", "https://test.pypi.org/simple/", "--no-cache"])
+        pip.main(["install", "-U", "peo", "-i", "https://test.pypi.org/simple/", "--no-cache"])
         cfg = Config(os.path.join(os.path.dirname(__file__), "alembic.ini"))
         cfg.set_main_option('script_location', str(os.path.join(BASE_PATH, 'alembic')))
         cfg.set_main_option('sqlalchemy.url', str(app.config['database']))
@@ -59,9 +57,9 @@ def app_info():
     return jsonify(name="peo", version=peo.VERSION)
 
 
-@app.route("/travisci", methods=["post"])
+@app.route("/travisci", methods=["post", "get"])
 def travis_hook():
-    app.logger.info("Travis CI call from %s", request.remote_addr)
+    current_app.logger.info("Travis CI call from %s", request.remote_addr)
     # if request.remote_addr not in ("54.173.229.200", "54.175.230.252"):
     #     return get_error_resp({
     #         "message": "It's only for Travis",
