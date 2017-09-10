@@ -52,6 +52,12 @@ class UpdateThread(Thread):
             os.kill(int(pidfile.read().strip()), signal.SIGHUP)
 
 
+    @classmethod
+    def getInstance(cls):
+        if cls.thread is not None:
+            return cls.thread
+
+
 @app.route("/", methods=["get"])
 def app_info():
     return jsonify(name="peo", version=peo.VERSION)
