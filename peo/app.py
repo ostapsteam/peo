@@ -49,13 +49,7 @@ class UpdateThread(Thread):
         command.upgrade(cfg, "head")
 
         with open(app.config["pid"]) as pidfile:
-            os.kill(int(pidfile.read().strip()), signal.SIGHUP)
-
-
-    @classmethod
-    def getInstance(cls):
-        if cls.thread is not None:
-            return cls.thread
+            os.kill(int(pidfile.read().strip()), signal.SIGTERM)
 
 
 @app.route("/", methods=["get"])
